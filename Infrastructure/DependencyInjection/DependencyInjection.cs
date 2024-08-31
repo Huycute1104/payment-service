@@ -1,7 +1,9 @@
 ﻿using Application.IService;
 using Application.Service;
 using Application.Utils.GenerateCode;
+using Domain.Interfaces;
 using Infrastructure.Data;
+using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +26,11 @@ namespace Infrastructure.DependencyInjection
                 b => b.MigrationsAssembly(typeof(DependencyInjection).Assembly.FullName)),
                 ServiceLifetime.Scoped);
             #endregion
+            //Repositories
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+            //UnitOfWork
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             // service
             services.AddScoped<IPaymentService, PaymentService>();
 
