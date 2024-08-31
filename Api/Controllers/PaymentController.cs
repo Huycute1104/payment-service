@@ -2,6 +2,7 @@
 using Application.Utils.GenerateCode;
 using Application.ViewModel;
 using Domain.Entities;
+using Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Transactions;
@@ -16,12 +17,19 @@ namespace Api.Controllers
         private readonly IPaymentService _paymentService;
         private readonly IConfiguration _configuration;
         private readonly IGenerateCode _generateCode;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public PaymentController(IPaymentService paymentService, IConfiguration configuration, IGenerateCode generateCode)
+
+        public PaymentController(
+            IPaymentService paymentService, 
+            IConfiguration configuration, 
+            IGenerateCode generateCode,
+            IUnitOfWork unitOfWork)
         {
             _paymentService = paymentService;
             _configuration = configuration;
             _generateCode = generateCode;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpPost("vnpays")]
@@ -51,8 +59,9 @@ namespace Api.Controllers
                             OrderId = _generateCode.GenerateOrderCode(),
                             Status = "Success"
                         };
-
-                        scope.Complete();
+                        /*_unitOfWork.PaymentTransactionRepository.Insert(transation);
+                        await _unitOfWork.SaveAsync();
+                        scope.Complete();*/
 
                         return Redirect(_configuration["Payment:SuccessUrl"]);
                     }

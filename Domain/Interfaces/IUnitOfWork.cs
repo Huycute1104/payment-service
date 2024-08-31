@@ -10,5 +10,9 @@ namespace Domain.Interfaces
     public interface IUnitOfWork : IDisposable, IAsyncDisposable
     {
         public IGenericRepository<PaymentTransaction> PaymentTransactionRepository { get; }
+
+        Task SaveAsync();
+        void Dispose();
+        ValueTask DisposeAsync();
     }
 }
