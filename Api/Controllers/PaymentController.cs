@@ -1,10 +1,12 @@
 ﻿using Application.IService;
+using Application.Service;
 using Application.Utils.GenerateCode;
 using Application.ViewModel;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Transactions;
 using System.Web;
 
@@ -18,18 +20,21 @@ namespace Api.Controllers
         private readonly IConfiguration _configuration;
         private readonly IGenerateCode _generateCode;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPayOSService _payOSService;
 
 
         public PaymentController(
             IPaymentService paymentService, 
             IConfiguration configuration, 
             IGenerateCode generateCode,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IPayOSService payOSService)
         {
             _paymentService = paymentService;
             _configuration = configuration;
             _generateCode = generateCode;
             _unitOfWork = unitOfWork;
+            _payOSService = payOSService;
         }
 
         [HttpPost("vnpays")]
@@ -56,12 +61,12 @@ namespace Api.Controllers
                         {
                             Amount = request.Amount,
                             CreatedAt = DateTime.UtcNow,
-                            OrderId = _generateCode.GenerateOrderCode(),
+                            OrderId = "123",
                             Status = "Success"
                         };
-                        /*_unitOfWork.PaymentTransactionRepository.Insert(transation);
-                        await _unitOfWork.SaveAsync();
-                        scope.Complete();*/
+                        _unitOfWork.PaymentTransactionRepository.Insert(transation);
+                         _unitOfWork.Save();
+                        scope.Complete();
 
                         return Redirect(_configuration["Payment:SuccessUrl"]);
                     }
@@ -75,6 +80,26 @@ namespace Api.Controllers
             {
                 return Redirect(_configuration["Payment:FailedUrl"]);
             }
+        }
+
+        [HttpPost("payos")]
+        public async Task<IActionResult> CreatePayOS([FromBody] PaymentRequest request)
+        {
+            var paymentUrl = await _payOSService.CreatePayOSUrl(request);
+            return Ok(new { Url = paymentUrl });
+        }
+        [HttpGet("cancel")]
+        public async Task<IActionResult> PayOSCancel()
+        {
+            // logic sau khi thanh toán thành công
+            return Redirect(_configuration["Payment:FailedUrl"]);
+        }
+        [HttpGet("success")]
+        public async Task<IActionResult> PayOSSuccess()
+        {
+            // logic sau khi thanh toán thành công
+            return Redirect(_configuration["Payment:SuccessUrl"]);
+       
         }
     }
 

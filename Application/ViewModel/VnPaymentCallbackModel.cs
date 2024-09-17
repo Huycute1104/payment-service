@@ -25,7 +25,7 @@ namespace Application.ViewModel
         public string? OrderInfo { get; set; }
 
         [FromQuery(Name = "vnp_Amount")]
-        public decimal Amount { get; set; }
+        public float Amount { get; set; }
 
         public bool Success => "00".Equals(ResponseCode);
     }

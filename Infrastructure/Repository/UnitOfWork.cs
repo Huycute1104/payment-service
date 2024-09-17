@@ -81,5 +81,9 @@ namespace Infrastructure.Repository
             await DisposeAsync(true);
             GC.SuppressFinalize(this);
         }
+        public void Save()
+        {
+            _context.SaveChanges();
+        }
     }
 }
